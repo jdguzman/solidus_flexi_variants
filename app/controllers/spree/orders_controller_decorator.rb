@@ -3,7 +3,7 @@ Spree::OrdersController.class_eval do
   include ProductCustomizations
   include AdHocUtils
 
-  before_action :set_option_params_values, only: [:populate]
+  #before_action :set_option_params_values, only: [:populate]
 
   # is there a better way to make sure options are passed into add order contents?
   def populate
@@ -13,7 +13,7 @@ Spree::OrdersController.class_eval do
     # 2,147,483,647 is crazy. See issue https://github.com/spree/spree/issues/2695.
     if quantity.between?(1, 2_147_483_647)
       begin
-        order.contents.add(variant, quantity, params[:options])
+        order.contents.add(variant, quantity, option_values)
       rescue ActiveRecord::RecordInvalid => e
         error = e.record.errors.full_messages.join(", ")
       end
@@ -33,11 +33,19 @@ Spree::OrdersController.class_eval do
 
   private
 
-  def set_option_params_values
-    params[:options] ||= {}
-    params[:options][:ad_hoc_option_values] = ad_hoc_option_value_ids
-    params[:options][:product_customizations] = product_customizations
-    params[:options][:customization_price] = params[:customization_price] if params[:customization_price]
-  end
+  #def set_option_params_values
+    #params[:options] ||= {}
+    #params[:options][:ad_hoc_option_values] = ad_hoc_option_value_ids
+    #params[:options][:product_customizations] = product_customizations
+    #params[:options][:customization_price] = params[:customization_price] if params[:customization_price]
+  #end
 
+  def option_values
+    options = {
+      ad_hoc_option_values: ad_hoc_option_value_ids,
+      product_customizations: product_customizations,
+    }
+    options[:customization_price] = params[:customization_price] if params[:customization_price]
+    options
+  end
 end
